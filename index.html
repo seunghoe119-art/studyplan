@@ -57,7 +57,6 @@
 <script type="text/babel" src="app/Dashboard.jsx"></script>
 <script type="text/babel" src="app/Timer.jsx"></script>
 <script type="text/babel" src="app/Progress.jsx"></script>
-<script type="text/babel" src="app/Numbers.jsx"></script>
 <script type="text/babel" src="app/Settings.jsx"></script>
 
 <script type="text/babel" data-presets="react">
@@ -67,7 +66,10 @@ const F = window.FT;
 function App() {
   const [store, setStore] = useState(() => F.loadStore());
   const [tab, setTab] = useState(() => {
-    try { return localStorage.getItem('ft_tab') || 'home'; } catch { return 'home'; }
+    try {
+      const saved = localStorage.getItem('ft_tab') || 'home';
+      return saved === 'numbers' ? 'home' : saved;
+    } catch { return 'home'; }
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [timerDayIdx, setTimerDayIdx] = useState(null);
@@ -104,7 +106,6 @@ function App() {
       {tab === 'home'     && <Dashboard    store={store} setStore={setStore} onNav={setTab} onStartToday={onStartToday} />}
       {tab === 'timer'    && <Timer        store={store} setStore={setStore} initialDayIdx={timerDayIdx} />}
       {tab === 'progress' && <ProgressView store={store} />}
-      {tab === 'numbers'  && <Numbers      store={store} setStore={setStore} />}
 
       <TabBar tab={tab} onChange={setTab} />
 
@@ -123,7 +124,6 @@ function TabBar({ tab, onChange }) {
     { key: 'home',     label: '홈',     icon: Icons.home },
     { key: 'timer',    label: '타이머', icon: Icons.timer },
     { key: 'progress', label: '진행률', icon: Icons.chart },
-    { key: 'numbers',  label: '숫자',   icon: Icons.hash },
   ];
   return ReactDOM.createPortal(
     <div className="tabbar-inner">

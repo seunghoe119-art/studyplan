@@ -334,10 +334,6 @@ function Dashboard({ store, setStore, onNav, onStartToday }) {
                   <span className="val mono">{avgTime ? `${avgTime}분` : '–'}</span>
                 </div>
                 <div className="stat-tile">
-                  <span className="lbl">숫자 시트 등록</span>
-                  <span className="val mono">{store.numbers.length}개</span>
-                </div>
-                <div className="stat-tile">
                   <span className="lbl">연속 학습</span>
                   <span className="val mono">🔥 {streak}일</span>
                 </div>
