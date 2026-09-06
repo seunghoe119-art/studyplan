@@ -82,19 +82,31 @@
     outline:2px solid var(--accent); outline-offset:2px;
   }
 
-  /* ---------- Tabs ---------- */
-  .tabs{display:flex; gap:2px; margin:14px 0 18px; border-bottom:1px solid var(--line); overflow-x:auto;}
+  /* ---------- Bottom tab bar (app-style nav, still a website) ---------- */
+  .tabbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:30;
+    display:flex; justify-content:center;
+    padding:8px max(10px, env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom));
+    background:var(--surface);
+    background:color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);
+  }
+  .tabbar-inner{display:flex; gap:2px; width:100%; max-width:520px;}
   .tab{
-    appearance:none; border:none; background:none; color:var(--ink-faint); font-size:13.5px; font-weight:600;
-    padding:9px 14px; cursor:pointer; position:relative; white-space:nowrap; border-radius:8px 8px 0 0;
+    appearance:none; border:none; background:none; color:var(--ink-faint); font-size:10.5px; font-weight:700;
+    padding:6px 4px 5px; cursor:pointer; position:relative; flex:1; display:flex; flex-direction:column;
+    align-items:center; gap:3px; border-radius:12px;
   }
-  .tab:hover{color:var(--ink-dim); background:var(--surface-2);}
-  .tab[aria-selected="true"]{color:var(--accent);}
-  .tab[aria-selected="true"]::after{
-    content:""; position:absolute; left:10px; right:10px; bottom:-1px; height:2px; background:var(--accent); border-radius:2px;
+  .tab .ticon{
+    width:34px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:999px;
+    font-size:15px; color:var(--ink-faint); transition:background .15s,color .15s;
   }
+  .tab:hover .ticon{background:var(--surface-2);}
+  .tab[aria-selected="true"] .ticon{background:var(--accent); color:var(--accent-ink);}
+  .tab[aria-selected="true"]{color:var(--ink);}
 
-  section[data-view]{display:flex; flex-direction:column; gap:18px;}
+  section[data-view]{display:flex; flex-direction:column; gap:18px; padding-bottom:78px;}
 
   /* ---------- Cards ---------- */
   .card{
@@ -115,20 +127,44 @@
   .badge.good{background:var(--good-soft); color:var(--good-ink);}
   .badge.bad{background:var(--bad-soft); color:var(--bad-ink);}
 
-  /* ---------- Today hero ---------- */
+  /* ---------- D-day hero (bold, solid accent — the page's thesis) ---------- */
   .hero{
-    background:linear-gradient(155deg, var(--surface) 0%, var(--surface) 60%, var(--accent-soft) 220%);
-    border:1px solid var(--line); border-radius:18px; padding:22px; box-shadow:var(--shadow);
+    background:var(--accent);
+    background:linear-gradient(155deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 78%, #7a1f0c) 100%);
+    color:var(--accent-ink); border-radius:20px; padding:20px 22px; box-shadow:var(--shadow);
     position:relative; overflow:hidden;
   }
-  .hero-top{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
-  .hero-kicker{font-size:12px; color:var(--ink-faint); font-weight:600; letter-spacing:.04em;}
-  .hero-title{font-size:22px; font-weight:800; margin-top:6px; letter-spacing:-.01em;}
-  .hero-range{font-family:"JetBrains Mono",monospace; font-size:14.5px; color:var(--ink-dim); margin-top:8px; font-variant-numeric:tabular-nums;}
+  .hero::after{
+    content:"🔥"; position:absolute; right:-18px; bottom:-28px; font-size:130px; opacity:.14; transform:rotate(-8deg);
+    pointer-events:none;
+  }
+  .hero-top{display:flex; align-items:flex-start; justify-content:space-between; gap:10px; position:relative; z-index:1;}
+  .hero-kicker{font-size:12px; font-weight:700; letter-spacing:.02em; opacity:.88;}
+  .hero-dday{font-size:44px; font-weight:800; letter-spacing:-.02em; margin-top:2px; line-height:1;}
+  .hero-streak{
+    display:flex; align-items:center; gap:5px; background:rgba(0,0,0,.16); padding:6px 11px; border-radius:999px;
+    font-size:12px; font-weight:700; white-space:nowrap;
+  }
+  .hero-progress{margin-top:16px; position:relative; z-index:1;}
+  .hero-progress .toprow{display:flex; justify-content:space-between; font-size:11.5px; font-weight:600; opacity:.9; margin-bottom:6px;}
+  .hero-progress .barbg{background:rgba(0,0,0,.18);}
+
+  /* ---------- 오늘의 분량 card ---------- */
+  .today-card .todayhead{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px;}
+  .today-card .round-chip{
+    display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--accent);
+    background:var(--accent-soft); padding:4px 10px; border-radius:999px;
+  }
+  .today-title{font-size:19px; font-weight:800; letter-spacing:-.01em; margin-top:2px;}
+  .hero-range{font-family:"JetBrains Mono",monospace; font-size:13.5px; color:var(--ink-dim); margin-top:6px; font-variant-numeric:tabular-nums;}
   .hero-meta{display:flex; gap:18px; margin-top:16px; flex-wrap:wrap;}
   .meta-stat .num{font-size:20px; font-weight:700;}
   .meta-stat .lbl{font-size:11px; color:var(--ink-faint); margin-top:2px;}
-  .hero-actions{margin-top:18px; display:flex; gap:8px; flex-wrap:wrap;}
+  .hero-actions{margin-top:18px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+  .start-btn{
+    width:100%; padding:14px 18px; font-size:15px; border-radius:14px;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+  }
 
   .btn{
     appearance:none; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink);
@@ -168,18 +204,19 @@
   label.check{display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:600; cursor:pointer;}
   label.check input{width:17px; height:17px; accent-color:var(--good);}
 
-  /* ---------- Week strip ---------- */
+  /* ---------- Week strip (filled pace cells) ---------- */
   .weekstrip{display:grid; grid-template-columns:repeat(7,1fr); gap:6px;}
   .weekcell{
-    border:1px solid var(--line); border-radius:10px; padding:8px 4px; text-align:center; cursor:pointer;
-    background:var(--surface-2); display:flex; flex-direction:column; align-items:center; gap:4px;
+    border:1.5px solid transparent; border-radius:12px; padding:9px 4px 8px; text-align:center; cursor:pointer;
+    background:var(--surface-2); display:flex; flex-direction:column; align-items:center; gap:5px; color:var(--ink-dim);
   }
-  .weekcell:hover{border-color:var(--line-strong);}
-  .weekcell.today{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset;}
-  .weekcell .wd{font-size:10.5px; color:var(--ink-faint); font-weight:600;}
-  .weekcell .dt{font-size:13px; font-weight:700; font-family:"JetBrains Mono",monospace;}
-  .weekcell .dot{width:8px; height:8px; border-radius:50%;}
-  .weekcell.done{background:var(--good-soft);}
+  .weekcell:hover{filter:brightness(.97);}
+  .weekcell.today{border-color:var(--ink); box-shadow:var(--shadow);}
+  .weekcell .wd{font-size:10px; font-weight:700; opacity:.75;}
+  .weekcell .dt{font-size:14px; font-weight:800; font-family:"JetBrains Mono",monospace;}
+  .weekcell .mark{font-size:10px; height:12px;}
+  .weekcell.filled{color:#fff;}
+  .weekcell.empty{opacity:.45;}
 
   /* ---------- Milestones ---------- */
   .milestones{display:flex; flex-direction:column; gap:0;}
@@ -202,7 +239,12 @@
   .stat-tile .lbl{font-size:11px; color:var(--ink-faint); margin-top:3px;}
 
   /* ---------- Timer ---------- */
-  .timer-wrap{display:flex; flex-direction:column; align-items:center; gap:18px; padding:8px 0 4px;}
+  .timer-card{transition:background-color .4s ease; border-radius:20px;}
+  .timer-wrap{display:flex; flex-direction:column; align-items:center; gap:16px; padding:10px 0 4px;}
+  .timer-stats{display:flex; gap:10px; width:100%;}
+  .timer-stats .tstat{flex:1; text-align:center; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:9px 6px;}
+  .timer-stats .tstat .num{font-size:15px; font-weight:800;}
+  .timer-stats .tstat .lbl{font-size:10px; color:var(--ink-faint); margin-top:2px;}
   .timer-ring{position:relative; width:230px; height:230px;}
   .timer-ring svg{width:100%; height:100%; transform:rotate(-90deg);}
   .timer-ring .bg-ring{fill:none; stroke:var(--surface-3); stroke-width:10;}
@@ -219,20 +261,29 @@
   .timer-log{margin-top:6px; font-size:12px; color:var(--ink-faint); text-align:center;}
 
   /* ---------- Progress ---------- */
-  .progress-block{display:flex; flex-direction:column; gap:10px;}
-  .subject-heading{display:flex; align-items:center; gap:8px; font-weight:800; font-size:14.5px;}
-  .subject-heading .badge-dot{width:10px; height:10px;}
+  .overall-bar{margin-bottom:4px;}
+  .overall-bar .toprow{display:flex; justify-content:space-between; font-size:12px; color:var(--ink-faint); font-weight:600; margin-bottom:6px;}
+  .overall-bar .toprow .num{color:var(--ink); font-weight:800;}
+  .progress-block{display:flex; flex-direction:column; gap:9px;}
+  .subject-heading{display:flex; align-items:center; gap:9px; font-weight:800; font-size:14.5px;}
+  .subject-letter{
+    width:26px; height:26px; border-radius:9px; color:#fff; font-size:12.5px; font-weight:800;
+    display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+  }
+  .subject-heading .stotal{margin-left:auto; font-size:12px; font-weight:600; color:var(--ink-faint); font-family:"JetBrains Mono",monospace;}
   .round-row{display:flex; align-items:center; gap:10px;}
   .round-row .rlabel{width:54px; font-size:12px; color:var(--ink-faint); font-weight:600; flex:0 0 auto;}
   .barbg{flex:1; height:11px; border-radius:999px; background:var(--surface-3); overflow:hidden;}
-  .barfg{height:100%; border-radius:999px;}
+  .barfg{height:100%; border-radius:999px; transition:width .3s;}
   .round-row .rpct{width:40px; text-align:right; font-size:11.5px; font-weight:700; font-family:"JetBrains Mono",monospace; flex:0 0 auto;}
 
-  .adherence{display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:12px; margin-top:2px;}
+  .adherence{display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:14px; margin-top:2px;}
+  .adherence .aicon{font-size:22px; flex:0 0 auto;}
+  .adherence .atext .big{font-size:15px; font-weight:800;}
+  .adherence .atext .small{font-size:12px; opacity:.85; margin-top:2px;}
   .adherence.good{background:var(--good-soft); color:var(--good-ink);}
   .adherence.bad{background:var(--bad-soft); color:var(--bad-ink);}
   .adherence.flat{background:var(--surface-2); color:var(--ink-dim);}
-  .adherence .big{font-size:18px; font-weight:800; font-family:"JetBrains Mono",monospace;}
 
   .chart-wrap{overflow-x:auto;}
   .chart-wrap svg{display:block;}
@@ -244,21 +295,37 @@
     padding:8px 10px; font-size:13px; font-family:inherit;
   }
   .numform .full{grid-column:1/-1;}
-  .searchbar{display:flex; gap:8px; margin-bottom:4px;}
+  .searchbar{display:flex; gap:8px; margin-bottom:2px;}
   .searchbar input{flex:1; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); border-radius:9px; padding:9px 12px; font-size:13.5px; font-family:inherit;}
-  .searchbar select{border:1px solid var(--line); background:var(--surface-2); color:var(--ink); border-radius:9px; padding:9px 10px; font-size:12.5px; font-family:inherit;}
-  .numcards{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px;}
-  .numcard{
-    background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:13px 14px;
-    display:flex; flex-direction:column; gap:6px; cursor:pointer; position:relative;
+  .pillrow{display:flex; gap:6px; overflow-x:auto; padding:2px 0 12px;}
+  .pillrow .pill{
+    appearance:none; border:1px solid var(--line); background:var(--surface); color:var(--ink-dim);
+    padding:6px 13px; border-radius:999px; font-size:12.5px; font-weight:700; white-space:nowrap; cursor:pointer; flex:0 0 auto;
   }
-  .numcard .value{font-family:"JetBrains Mono",monospace; font-size:19px; font-weight:800; color:var(--accent);}
-  .numcard.hidden-mode .value{filter:blur(6px); user-select:none;}
-  .numcard .meaning{font-size:13px; font-weight:600;}
-  .numcard .confuse{font-size:11.5px; color:var(--ink-faint);}
-  .numcard .tagrow{display:flex; justify-content:space-between; align-items:center; margin-top:2px;}
-  .numcard .del{position:absolute; top:8px; right:8px; border:none; background:none; color:var(--ink-faint); cursor:pointer; font-size:13px; padding:3px 6px;}
-  .numcard .del:hover{color:var(--bad);}
+  .pillrow .pill.active{background:var(--ink); border-color:var(--ink); color:var(--bg);}
+  .numgroup{margin-bottom:6px;}
+  .numgroup .ghead{display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:800; color:var(--ink-dim); margin:14px 0 8px;}
+  .numgroup .ghead .gcount{
+    font-family:"JetBrains Mono",monospace; font-size:10.5px; font-weight:700; color:var(--ink-faint);
+    background:var(--surface-2); border-radius:999px; padding:1px 7px;
+  }
+  .numgroup:first-child .ghead{margin-top:0;}
+  .numrow{
+    display:flex; align-items:center; gap:12px; padding:11px 4px; border-bottom:1px solid var(--line); cursor:pointer;
+  }
+  .numrow:last-child{border-bottom:none;}
+  .numrow .nbar{width:4px; align-self:stretch; border-radius:3px; flex:0 0 auto;}
+  .numrow .nbody{flex:1; min-width:0;}
+  .numrow .meaning{font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .numrow .confuse{font-size:11px; color:var(--ink-faint); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .numrow .value{font-family:"JetBrains Mono",monospace; font-size:16px; font-weight:800; color:var(--accent); white-space:nowrap; flex:0 0 auto;}
+  .numrow.hidden-mode .value{filter:blur(5px); user-select:none;}
+  .numrow .star{
+    border:none; background:none; cursor:pointer; font-size:15px; color:var(--line-strong); flex:0 0 auto; padding:2px;
+  }
+  .numrow .star.on{color:#e0a825;}
+  .numrow .del{border:none; background:none; color:var(--ink-faint); cursor:pointer; font-size:13px; padding:2px 4px; flex:0 0 auto;}
+  .numrow .del:hover{color:var(--bad);}
   .empty-note{font-size:12.5px; color:var(--ink-faint); padding:10px 2px;}
 
   .settings-panel{display:flex; flex-direction:column; gap:14px;}
@@ -286,41 +353,45 @@
       <h1>🚒 소방전술 작전판</h1>
       <span class="tagline">승진시험 D-Day 학습 관리</span>
     </div>
-    <div class="dday-pill"><span class="lbl">시험</span><span class="val num" id="ddayVal">D-0</span></div>
     <button class="icon-btn" id="settingsBtn" title="설정" aria-label="설정">⚙︎</button>
   </div>
-
-  <nav class="tabs" role="tablist" aria-label="화면 전환">
-    <button class="tab" data-tab="dashboard" role="tab" aria-selected="true">대시보드</button>
-    <button class="tab" data-tab="timer" role="tab" aria-selected="false">타이머</button>
-    <button class="tab" data-tab="progress" role="tab" aria-selected="false">진행률</button>
-    <button class="tab" data-tab="numbers" role="tab" aria-selected="false">숫자 암기 시트</button>
-  </nav>
 
   <!-- ===================== DASHBOARD ===================== -->
   <section data-view="dashboard">
     <div class="hero">
       <div class="hero-top">
         <div>
-          <div class="hero-kicker" id="heroKicker">오늘 · 1회독</div>
-          <div class="hero-title" id="heroTitle">화재 원문 정독</div>
+          <div class="hero-kicker" id="heroKicker">🔥 소방승진시험까지</div>
+          <div class="hero-dday num" id="ddayVal">D-0</div>
         </div>
-        <span class="badge weekend" id="heroWeekBadge">주말</span>
+        <span class="hero-streak" id="heroStreakChip">🔗 0일 연속</span>
       </div>
-      <div class="hero-range num" id="heroRange">화재1 _0001 ~ _0024</div>
-      <div class="hero-meta">
-        <div class="meta-stat"><div class="num" id="heroMinutes">110분</div><div class="lbl">예상 소요</div></div>
-        <div class="meta-stat"><div class="num" id="heroStreak">0일</div><div class="lbl">연속 학습</div></div>
-        <div class="meta-stat"><div class="num" id="heroDone">0%</div><div class="lbl">오늘 완료율</div></div>
-      </div>
-      <div class="hero-actions">
-        <button class="btn primary" id="startTodayBtn">오늘 타이머 시작 →</button>
-        <label class="check" style="margin-left:4px;"><input type="checkbox" id="heroCompleteCheck"> 오늘 완료로 표시</label>
+      <div class="hero-progress">
+        <div class="toprow"><span id="heroKicker2">1회독 · 정독</span><span class="num" id="heroDone">32%</span></div>
+        <div class="barbg"><div class="barfg" id="heroBarFg" style="width:32%; background:#fff;"></div></div>
       </div>
     </div>
 
+    <div class="card today-card">
+      <div class="todayhead">
+        <h2 style="text-transform:none; font-size:14px; color:var(--ink); font-weight:800;">오늘의 분량</h2>
+        <span class="round-chip" id="heroWeekBadge">주말</span>
+      </div>
+      <div class="today-title" id="heroTitle">화재 원문 정독</div>
+      <div class="hero-range num" id="heroRange">화재1 _0001 ~ _0024</div>
+      <div class="hero-meta">
+        <div class="meta-stat"><div class="num" id="heroMinutes">110분</div><div class="lbl">예상 소요</div></div>
+        <div class="meta-stat"><div class="num" id="heroPages">88p</div><div class="lbl">페이지</div></div>
+        <div class="meta-stat"><div class="num" id="heroRoundName">1회독</div><div class="lbl">순서</div></div>
+      </div>
+      <div class="hero-actions">
+        <button class="btn primary start-btn" id="startTodayBtn">▶ 공부 시작</button>
+      </div>
+      <label class="check" style="margin-top:12px;"><input type="checkbox" id="heroCompleteCheck"> 오늘 완료로 표시</label>
+    </div>
+
     <div class="card">
-      <h2>이번 주</h2>
+      <h2>이번 주 페이스</h2>
       <div class="weekstrip" id="weekStrip"></div>
     </div>
 
@@ -370,7 +441,7 @@
       </div>
     </div>
 
-    <div class="card timer-wrap">
+    <div class="card timer-wrap timer-card" id="timerCard">
       <div class="phase-pills" id="phasePills"></div>
       <div class="timer-ring">
         <svg viewBox="0 0 120 120">
@@ -388,6 +459,11 @@
         <button class="btn primary" id="timerToggleBtn">시작</button>
         <button class="btn ghost" id="timerResetBtn">리셋</button>
       </div>
+      <div class="timer-stats">
+        <div class="tstat"><div class="num" id="tstatProgress">0%</div><div class="lbl">진행률</div></div>
+        <div class="tstat"><div class="num" id="tstatFiles">–</div><div class="lbl">오늘 범위</div></div>
+        <div class="tstat"><div class="num" id="tstatSession">0m</div><div class="lbl">세션 시간</div></div>
+      </div>
       <div class="timer-log" id="timerLog">시작하면 실제 소요 시간이 자동 기록됩니다.</div>
     </div>
   </section>
@@ -400,8 +476,16 @@
     </div>
 
     <div class="card">
+      <h2>전체 진행률</h2>
+      <div class="overall-bar">
+        <div class="toprow"><span>전체</span><span class="num" id="overallCount">0 / 2,370 파일</span></div>
+        <div class="barbg"><div class="barfg" id="overallBarFg" style="width:0%; background:var(--accent);"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
       <h2>과목 × 회독 진행률</h2>
-      <div style="display:flex; flex-direction:column; gap:16px; margin-top:6px;" id="progressGrid"></div>
+      <div style="display:flex; flex-direction:column; gap:18px; margin-top:6px;" id="progressGrid"></div>
     </div>
 
     <div class="card">
@@ -423,7 +507,8 @@
           <option value="common">공통</option>
         </select>
         <input type="text" id="numMeaning" class="full" placeholder="의미 (예: 완강기 사용 시 지상 이격거리)" required>
-        <input type="text" id="numConfuse" class="full" placeholder="헷갈리는 비슷한 숫자 (선택)">
+        <input type="text" id="numCategory" placeholder="분류 (예: 소방시설, 비워두면 과목명)">
+        <input type="text" id="numConfuse" placeholder="헷갈리는 비슷한 숫자 (선택)">
         <button type="submit" class="btn primary full">추가</button>
       </form>
     </div>
@@ -431,22 +516,31 @@
     <div class="card">
       <div class="searchbar">
         <input type="text" id="numSearch" placeholder="검색 (숫자, 의미, 키워드)">
-        <select id="numFilter">
-          <option value="all">전체 과목</option>
-          <option value="fire">화재</option>
-          <option value="rescue">구조</option>
-          <option value="ems">구급</option>
-          <option value="common">공통</option>
-        </select>
         <button class="btn" data-size="sm" id="quizModeBtn">퀴즈 모드</button>
       </div>
-      <div class="numcards" id="numCards"></div>
+      <div class="pillrow" id="numPillRow">
+        <button class="pill active" data-filter="all">전체</button>
+        <button class="pill" data-filter="fire">화재</button>
+        <button class="pill" data-filter="rescue">구조</button>
+        <button class="pill" data-filter="ems">구급</button>
+        <button class="pill" data-filter="fav">⭐ 즐겨찾기</button>
+      </div>
+      <div id="numCards"></div>
       <div class="empty-note" id="numEmptyNote" hidden>등록된 숫자가 없습니다. 위 양식으로 오늘 본 시험 포인트 숫자를 추가해보세요.</div>
     </div>
   </section>
 
   <footer class="note">전 일정은 초기 실측(페이지당 1.3분 등) 기반 추정치입니다 · 데이터는 이 브라우저에 로컬로만 저장됩니다(설정에서 백업 가능) · 시험일 2026-11-07(토)</footer>
 </div>
+
+<nav class="tabbar" role="tablist" aria-label="화면 전환">
+  <div class="tabbar-inner">
+    <button class="tab" data-tab="dashboard" role="tab" aria-selected="true"><span class="ticon">⌂</span>홈</button>
+    <button class="tab" data-tab="timer" role="tab" aria-selected="false"><span class="ticon">◷</span>타이머</button>
+    <button class="tab" data-tab="progress" role="tab" aria-selected="false"><span class="ticon">▤</span>진행률</button>
+    <button class="tab" data-tab="numbers" role="tab" aria-selected="false"><span class="ticon">#</span>숫자</button>
+  </div>
+</nav>
 
 <div class="modal-backdrop" id="settingsModal" hidden>
   <div class="modal">
@@ -759,20 +853,32 @@
     if(diff===0) return 'D-DAY';
     return diff>0 ? ('D-'+diff) : ('D+'+Math.abs(diff));
   }
+  var ROUND_NOUN = {1:'정독', 2:'속독', 3:'회상'};
+  function roundProgressPct(round){
+    var subs = ['fire','rescue','ems'];
+    var total=0, done=0;
+    subs.forEach(function(sk){ var st=subjectRoundStats(sk,round); total+=st.totalFiles; done+=st.doneFiles; });
+    return total ? Math.round(done/total*100) : 0;
+  }
   function renderHero(){
     document.getElementById('ddayVal').textContent = ddayText(EXAM_DATE);
     var idx = dayIndexOf(todayUTC());
     var day = SCHEDULE[Math.min(Math.max(idx,0),SCHEDULE.length-1)];
     var future = idx<0, past = idx>=SCHEDULE.length;
-    document.getElementById('heroKicker').textContent = future ? '시작 예정' : (past ? '일정 종료' : ('오늘 · '+day.roundLabel));
+    document.getElementById('heroKicker').textContent = '🔥 소방승진시험까지';
     document.getElementById('heroTitle').textContent = future ? '9/5부터 시작됩니다' : day.title;
     document.getElementById('heroRange').textContent = day.rangeLabel;
     document.getElementById('heroWeekBadge').textContent = day.isWeekend ? '주말' : '평일';
-    document.getElementById('heroWeekBadge').className = 'badge '+(day.isWeekend?'weekend':'weekday');
+    document.getElementById('heroWeekBadge').className = 'round-chip';
     document.getElementById('heroMinutes').textContent = day.estMinutes ? (day.estMinutes+'분') : '–';
-    document.getElementById('heroStreak').textContent = computeStreak()+'일';
+    document.getElementById('heroPages').textContent = day.pageCount ? (day.pageCount+'p') : (day.fileCount ? (day.fileCount+'개') : '–');
+    document.getElementById('heroRoundName').textContent = day.roundLabel || '–';
+    document.getElementById('heroStreakChip').textContent = '🔗 '+computeStreak()+'일 연속';
+    var pct = (day.round>=1 && day.round<=3) ? roundProgressPct(day.round) : 0;
+    document.getElementById('heroDone').textContent = pct+'%';
+    document.getElementById('heroKicker2').textContent = (day.roundLabel||'')+(ROUND_NOUN[day.round]?(' · '+ROUND_NOUN[day.round]):'');
+    document.getElementById('heroBarFg').style.width = pct+'%';
     var log = getLog(day.dateStr);
-    document.getElementById('heroDone').textContent = log.completed ? '100%' : '0%';
     document.getElementById('heroCompleteCheck').checked = !!log.completed;
     document.getElementById('heroCompleteCheck').onchange = function(e){
       getLog(day.dateStr).completed = e.target.checked; saveStore(); renderAll();
@@ -804,10 +910,14 @@
       var idx = dayIndexOf(d);
       var inRange = idx>=0 && idx<SCHEDULE.length;
       var day = inRange ? SCHEDULE[idx] : null;
+      var isDone = day && STORE.dailyLog[day.dateStr] && STORE.dailyLog[day.dateStr].completed;
       var cell = document.createElement('div');
-      cell.className = 'weekcell'+(fmt(d)===fmt(t)?' today':'')+((day && STORE.dailyLog[day.dateStr] && STORE.dailyLog[day.dateStr].completed)?' done':'');
-      var dotColor = day ? day.subjectColor : 'var(--line-strong)';
-      cell.innerHTML = '<div class="wd">'+WD[d.getUTCDay()]+'</div><div class="dt">'+d.getUTCDate()+'</div><div class="dot" style="background:'+dotColor+'"></div>';
+      cell.className = 'weekcell'+(fmt(d)===fmt(t)?' today':'')+(day?' filled':' empty')+(isDone?' done':'');
+      if(day){
+        cell.style.background = isDone ? 'var(--good)' : day.subjectColor;
+        cell.style.opacity = isDone ? '1' : '0.72';
+      }
+      cell.innerHTML = '<div class="wd">'+WD[d.getUTCDay()]+'</div><div class="dt">'+d.getUTCDate()+'</div><div class="mark">'+(isDone?'✓':'')+'</div>';
       cell.title = day ? (day.title) : '일정 범위 밖';
       cell.addEventListener('click', function(dIdx){ return function(){ if(dIdx>=0 && dIdx<SCHEDULE.length){ state.viewIndex=dIdx; renderDayNav(); } }; }(idx));
       el.appendChild(cell);
@@ -943,6 +1053,18 @@
     ring.style.stroke = phase ? phase.color : 'var(--good)';
     ring.setAttribute('stroke-dasharray', circumference);
     ring.setAttribute('stroke-dashoffset', circumference*(1-pct));
+
+    var card = document.getElementById('timerCard');
+    card.style.background = phase ? ('color-mix(in srgb, '+phase.color+' 14%, var(--surface))') : 'var(--surface)';
+
+    var historySec = state.timer.history.reduce(function(a,h){return a+h.actualSec;},0);
+    var elapsedInPhase = phase ? Math.max(0, totalSec-remaining) : 0;
+    var sessionSec = historySec + elapsedInPhase;
+    var totalEstSec = day.estMinutes*60;
+    var overallPct = totalEstSec>0 ? Math.min(100, Math.round(sessionSec/totalEstSec*100)) : 0;
+    document.getElementById('tstatProgress').textContent = overallPct+'%';
+    document.getElementById('tstatFiles').textContent = day.fileCount ? (day.fileCount+'개') : (day.pageCount? day.pageCount+'p' : '자유진행');
+    document.getElementById('tstatSession').textContent = Math.round(sessionSec/60)+'m';
   }
   function stopInterval(){ if(state.timer.intervalId){ clearInterval(state.timer.intervalId); state.timer.intervalId=null; } }
   function tick(){
@@ -1014,37 +1136,52 @@
     var doneFiles = days.reduce(function(a,d){ var log=STORE.dailyLog[d.dateStr]; return a+((log&&log.completed)?d.fileCount:0); },0);
     return { totalFiles:totalFiles, doneFiles:doneFiles, pct: totalFiles? Math.round(doneFiles/totalFiles*100):0 };
   }
+  var ROUND_COLOR = {1:'var(--phase-a)', 2:'var(--phase-b)', 3:'var(--phase-c)'};
+  var SUBJECT_LETTER = {fire:'화', rescue:'구', ems:'급'};
   function renderProgress(){
     var grid = document.getElementById('progressGrid'); grid.innerHTML='';
+    var overallTotal=0, overallDone=0;
     ['fire','rescue','ems'].forEach(function(sk){
       var sub = SUBJECTS[sk];
       var block = document.createElement('div');
       block.className='progress-block';
       var heading = document.createElement('div');
       heading.className='subject-heading';
-      heading.innerHTML = '<span class="badge-dot" style="background:'+sub.color+'"></span>'+sub.name;
+      var subjTotal=0, subjDone=0;
+      [1,2,3].forEach(function(r){ var st=subjectRoundStats(sk,r); subjTotal+=st.totalFiles; subjDone+=st.doneFiles; });
+      overallTotal+=subjTotal; overallDone+=subjDone;
+      heading.innerHTML = '<span class="subject-letter" style="background:'+sub.color+'">'+SUBJECT_LETTER[sk]+'</span>'+sub.name+
+        '<span class="stotal">'+subjDone+' / '+subjTotal+' 파일 · '+(subjTotal?Math.round(subjDone/subjTotal*100):0)+'%</span>';
       block.appendChild(heading);
       [1,2,3].forEach(function(r){
         var st = subjectRoundStats(sk,r);
         var row = document.createElement('div'); row.className='round-row';
-        row.innerHTML = '<span class="rlabel">'+r+'회독</span><div class="barbg"><div class="barfg" style="width:'+st.pct+'%; background:'+sub.color+'"></div></div><span class="rpct num">'+st.pct+'%</span>';
+        row.innerHTML = '<span class="rlabel">'+r+'회독</span><div class="barbg"><div class="barfg" style="width:'+st.pct+'%; background:'+ROUND_COLOR[r]+'"></div></div><span class="rpct num">'+st.pct+'%</span>';
         block.appendChild(row);
       });
       grid.appendChild(block);
     });
+    document.getElementById('overallCount').textContent = overallDone.toLocaleString()+' / '+overallTotal.toLocaleString()+' 파일';
+    document.getElementById('overallBarFg').style.width = (overallTotal?Math.round(overallDone/overallTotal*100):0)+'%';
 
-    // adherence
+    // adherence banner
     var idx = dayIndexOf(todayUTC());
     var boxEl = document.getElementById('adherenceBox');
     if(idx<0 || idx>=SCHEDULE.length){
       boxEl.className='adherence flat';
-      boxEl.innerHTML = '<div>일정 시작 전이거나 종료되었습니다.</div>';
+      boxEl.innerHTML = '<span class="aicon">🗓️</span><div class="atext"><div class="big">일정 시작 전이거나 종료되었습니다</div></div>';
     }else{
       var expectedDone = idx+1; // days that should be done by today inclusive
       var actualDone = SCHEDULE.slice(0, idx+1).filter(function(d){ var l=STORE.dailyLog[d.dateStr]; return l&&l.completed; }).length;
       var delta = actualDone - expectedDone;
+      var nextMilestone = SCHEDULE.filter(function(d){ return dayIndexOf(d.date) > idx && (d.index===27||d.index===40||d.index===49||d.index===53); })[0];
+      var subText = '완료 '+actualDone+'일 / 경과 '+expectedDone+'일';
+      if(nextMilestone) subText += ' · 페이스 유지 시 '+fmt(nextMilestone.date)+'에 '+nextMilestone.title+' 시작';
+      var headline = delta===0 ? '계획대로 정확히 진행 중이에요' : ('계획보다 '+Math.abs(delta)+'일 '+(delta>0?'앞서':'밀려')+' 있어요');
       boxEl.className = 'adherence '+(delta>=0?'good':(delta<=-3?'bad':'flat'));
-      boxEl.innerHTML = '<div class="big num">'+(delta>=0?('D+'+delta):('D'+delta))+'</div><div>계획 대비 '+(delta>=0?'앞서':'밀린')+' 진행 · 완료 '+actualDone+'일 / 경과 '+expectedDone+'일</div>';
+      boxEl.innerHTML = '<span class="aicon">'+(delta>0?'✅':(delta<=-3?'⚠️':'📍'))+'</span>'+
+        '<div class="atext"><div class="big">'+headline+'</div>'+
+        '<div class="small">'+subText+'</div></div>';
     }
 
     renderChart();
@@ -1105,37 +1242,60 @@
   }
 
   /* ================= Numbers sheet ================= */
+  var SUBJ_COLOR = {fire:'var(--fire)', rescue:'var(--rescue)', ems:'var(--ems)', common:'var(--ink-faint)'};
+  var SUBJ_NAME = {fire:'화재', rescue:'구조', ems:'구급', common:'공통'};
+  state.numFilter = 'all';
   function renderNumbers(){
     var listEl = document.getElementById('numCards');
     var q = (document.getElementById('numSearch').value||'').trim().toLowerCase();
-    var filt = document.getElementById('numFilter').value;
+    var filt = state.numFilter;
     var items = STORE.numbers.filter(function(n){
-      var matchQ = !q || (n.value+n.meaning+n.confuse).toLowerCase().indexOf(q)>-1;
-      var matchF = filt==='all' || n.subject===filt;
+      var matchQ = !q || (n.value+n.meaning+(n.confuse||'')+(n.category||'')).toLowerCase().indexOf(q)>-1;
+      var matchF = filt==='all' || (filt==='fav' ? !!n.fav : n.subject===filt);
       return matchQ && matchF;
     }).sort(function(a,b){ return b.createdAt-a.createdAt; });
     listEl.innerHTML='';
     document.getElementById('numEmptyNote').hidden = items.length>0;
-    var subjColor = {fire:'var(--fire)', rescue:'var(--rescue)', ems:'var(--ems)', common:'var(--ink-faint)'};
-    var subjName = {fire:'화재', rescue:'구조', ems:'구급', common:'공통'};
+
+    var groups = {}; var order = [];
     items.forEach(function(n){
-      var card = document.createElement('div');
-      card.className='numcard'+(state.quizMode?' hidden-mode':'');
-      card.innerHTML =
-        '<button class="del" data-id="'+n.id+'" title="삭제">✕</button>'+
-        '<div class="value">'+escapeHtml(n.value)+'</div>'+
-        '<div class="meaning">'+escapeHtml(n.meaning)+'</div>'+
-        (n.confuse? '<div class="confuse">⚠ '+escapeHtml(n.confuse)+'</div>' : '')+
-        '<div class="tagrow"><span class="badge" style="background:transparent; border:1px solid var(--line); color:'+subjColor[n.subject]+'">'+subjName[n.subject]+'</span></div>';
-      if(state.quizMode){
-        card.addEventListener('click', function(){ card.classList.toggle('hidden-mode'); });
-      }
-      card.querySelector('.del').addEventListener('click', function(e){
-        e.stopPropagation();
-        STORE.numbers = STORE.numbers.filter(function(x){return x.id!==n.id;});
-        saveStore(); renderNumbers(); renderStats();
+      var key = (n.category && n.category.trim()) || SUBJ_NAME[n.subject] || '기타';
+      if(!groups[key]){ groups[key]=[]; order.push(key); }
+      groups[key].push(n);
+    });
+    order.forEach(function(key){
+      var groupWrap = document.createElement('div'); groupWrap.className='numgroup';
+      groupWrap.innerHTML = '<div class="ghead">'+escapeHtml(key)+'<span class="gcount">'+groups[key].length+'</span></div>';
+      var listWrap = document.createElement('div');
+      groups[key].forEach(function(n){
+        var row = document.createElement('div');
+        row.className='numrow'+(state.quizMode?' hidden-mode':'');
+        row.innerHTML =
+          '<div class="nbar" style="background:'+(SUBJ_COLOR[n.subject]||'var(--ink-faint)')+'"></div>'+
+          '<button class="star'+(n.fav?' on':'')+'" data-id="'+n.id+'" title="즐겨찾기">'+(n.fav?'★':'☆')+'</button>'+
+          '<div class="nbody"><div class="meaning">'+escapeHtml(n.meaning)+'</div>'+
+          (n.confuse? '<div class="confuse">⚠ '+escapeHtml(n.confuse)+'</div>' : '')+'</div>'+
+          '<div class="value">'+escapeHtml(n.value)+'</div>'+
+          '<button class="del" data-id="'+n.id+'" title="삭제">✕</button>';
+        if(state.quizMode){
+          row.addEventListener('click', function(ev){
+            if(ev.target.closest('.star')||ev.target.closest('.del')) return;
+            row.classList.toggle('hidden-mode');
+          });
+        }
+        row.querySelector('.star').addEventListener('click', function(e){
+          e.stopPropagation();
+          n.fav = !n.fav; saveStore(); renderNumbers();
+        });
+        row.querySelector('.del').addEventListener('click', function(e){
+          e.stopPropagation();
+          STORE.numbers = STORE.numbers.filter(function(x){return x.id!==n.id;});
+          saveStore(); renderNumbers(); renderStats();
+        });
+        listWrap.appendChild(row);
       });
-      listEl.appendChild(card);
+      groupWrap.appendChild(listWrap);
+      listEl.appendChild(groupWrap);
     });
   }
   document.getElementById('numForm').addEventListener('submit', function(e){
@@ -1146,8 +1306,10 @@
     STORE.numbers.push({
       id:'n'+Date.now()+Math.random().toString(36).slice(2,6),
       value:value, meaning:meaning,
+      category:document.getElementById('numCategory').value.trim(),
       confuse:document.getElementById('numConfuse').value.trim(),
       subject:document.getElementById('numSubject').value,
+      fav:false,
       createdAt:Date.now()
     });
     saveStore();
@@ -1155,7 +1317,12 @@
     renderNumbers(); renderStats();
   });
   document.getElementById('numSearch').addEventListener('input', renderNumbers);
-  document.getElementById('numFilter').addEventListener('change', renderNumbers);
+  document.getElementById('numPillRow').addEventListener('click', function(e){
+    var btn = e.target.closest('.pill'); if(!btn) return;
+    state.numFilter = btn.dataset.filter;
+    this.querySelectorAll('.pill').forEach(function(p){ p.classList.toggle('active', p===btn); });
+    renderNumbers();
+  });
   document.getElementById('quizModeBtn').addEventListener('click', function(){
     state.quizMode = !state.quizMode;
     this.textContent = state.quizMode ? '퀴즈 모드 해제' : '퀴즈 모드';
