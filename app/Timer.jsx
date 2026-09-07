@@ -1,105 +1,98 @@
-// Timer.jsx — 타이머 화면 (phase 자동/실제시간 자동기록)
-
+// Timer.jsx — persist each action and reconcile elapsed wall time on return.
 function Timer({ store, setStore, initialDayIdx }) {
   const F = window.FT;
-
+  const T = window.TimerState;
   const todayIdx = Math.max(0, Math.min(F.dayIndexOf(F.todayUTC()), F.SCHEDULE.length - 1));
-  const [dayIdx, setDayIdx] = React.useState(initialDayIdx != null ? initialDayIdx : todayIdx);
+  const [dayIdx, selectDay] = React.useState(() => {
+    const saved = F.SCHEDULE.findIndex(d => d.dateStr === store.timerDay);
+    return initialDayIdx != null ? initialDayIdx : saved >= 0 ? saved : todayIdx;
+  });
+  const [, redraw] = React.useState(0);
+  const latest = React.useRef(store);
+  latest.current = store;
   const day = F.SCHEDULE[dayIdx];
 
-  // Timer state
-  const [phaseIdx, setPhaseIdx] = React.useState(0);
-  const [remaining, setRemaining] = React.useState(day.phases[0] ? day.phases[0].minutes * 60 : 0);
-  const [running, setRunning] = React.useState(false);
-  const [history, setHistory] = React.useState([]);
-  const [log, setLog] = React.useState('시작하면 실제 소요 시간이 자동 기록됩니다.');
-  const startedRef = React.useRef(null);
-
-  // 새 날 선택 시 리셋
-  React.useEffect(() => {
-    setPhaseIdx(0);
-    setRemaining(day.phases[0] ? day.phases[0].minutes * 60 : 0);
-    setRunning(false);
-    setHistory([]);
-    setLog(day.phases.length ? '시작하면 실제 소요 시간이 자동 기록됩니다.' : '이 날은 자유 진행 항목입니다.');
-    startedRef.current = null;
-  }, [dayIdx]);
-
-  // tick
-  React.useEffect(() => {
-    if (!running) return;
-    const id = setInterval(() => {
-      setRemaining(r => {
-        if (r <= 1) {
-          // phase 완료
-          F.beep();
-          const phase = day.phases[phaseIdx];
-          const spent = phase ? phase.minutes * 60 : 0;
-          setHistory(h => [...h, { phase: phase?.label, plannedSec: spent, actualSec: spent }]);
-
-          if (phaseIdx + 1 >= day.phases.length) {
-            // 세션 완료
-            setRunning(false);
-            finishSession([...history, { phase: phase?.label, plannedSec: spent, actualSec: spent }]);
-            return 0;
-          } else {
-            const next = day.phases[phaseIdx + 1];
-            setPhaseIdx(phaseIdx + 1);
-            return next.minutes * 60;
-          }
-        }
-        return r - 1;
-      });
-    }, 1000);
-    return () => clearInterval(id);
-  }, [running, phaseIdx, day, history]);
-
-  const finishSession = (fullHistory) => {
-    const totalActual = fullHistory.reduce((a, h) => a + h.actualSec, 0);
-    const lg = F.getLog(store, day.dateStr);
-    lg.actualMinutes = Math.round(totalActual / 60) || day.estMinutes;
-    lg.history = fullHistory;
-    lg.completed = true;
-    F.saveStore(store);
-    setStore({ ...store });
-    setLog(`세션 완료! 실제 약 ${lg.actualMinutes}분 기록됨 (자동 완료 표시).`);
-  };
-
-  const toggle = () => {
-    if (!day.phases.length) return;
-    if (running) {
-      // 일시정지: 현재 phase까지 진행분 계산
-      setRunning(false);
-    } else {
-      setRunning(true);
-      if (!startedRef.current) startedRef.current = Date.now();
+  // Save completion and countdown together, so a restart cannot duplicate a record.
+  const putSession = (data, target, next) => {
+    const previous = data.timerSessions?.[target.dateStr];
+    data.timerSessions = { ...data.timerSessions, [target.dateStr]: next };
+    if (next.completed && !previous?.completed) {
+      const lg = F.getLog(data, target.dateStr);
+      lg.actualMinutes = Math.round(next.history.reduce((sum, h) => sum + h.actualSec, 0) / 60);
+      lg.history = next.history;
+      lg.completed = true;
     }
   };
-  const skipPhase = () => {
-    if (!day.phases.length) return;
-    const phase = day.phases[phaseIdx];
-    const spent = (phase.minutes * 60) - remaining;
-    const newHist = [...history, { phase: phase.label, plannedSec: phase.minutes * 60, actualSec: spent }];
-    setHistory(newHist);
-
-    if (phaseIdx + 1 >= day.phases.length) {
-      setRunning(false);
-      finishSession(newHist);
-      setRemaining(0);
-      setPhaseIdx(day.phases.length);
-    } else {
-      const next = day.phases[phaseIdx + 1];
-      setPhaseIdx(phaseIdx + 1);
-      setRemaining(next.minutes * 60);
+  const reconcile = () => {
+    const data = latest.current;
+    let changed = false;
+    for (const target of F.SCHEDULE) {
+      const saved = data.timerSessions?.[target.dateStr];
+      if (!saved?.running) continue;
+      const next = T.advance(saved, target, Date.now());
+      // Keep the original anchor between transitions; no per-second disk writes.
+      if (next.phaseIdx !== saved.phaseIdx) {
+        putSession(data, target, next);
+        changed = true;
+      }
     }
+    if (changed) {
+      F.saveStore(data);
+      setStore({ ...data });
+      if (document.visibilityState === 'visible') F.beep();
+    }
+    redraw(n => n + 1);
   };
-  const reset = () => {
-    setPhaseIdx(0);
-    setRemaining(day.phases[0] ? day.phases[0].minutes * 60 : 0);
-    setRunning(false);
-    setHistory([]);
-    setLog('시작하면 실제 소요 시간이 자동 기록됩니다.');
+  React.useEffect(() => {
+    reconcile();
+    const id = setInterval(reconcile, 1000);
+    const checkpoint = () => {
+      reconcile();
+      F.saveStore(latest.current);
+    };
+    window.addEventListener('pageshow', reconcile);
+    window.addEventListener('focus', reconcile);
+    window.addEventListener('pagehide', checkpoint);
+    document.addEventListener('visibilitychange', checkpoint);
+    return () => {
+      clearInterval(id);
+      window.removeEventListener('pageshow', reconcile);
+      window.removeEventListener('focus', reconcile);
+      window.removeEventListener('pagehide', checkpoint);
+      document.removeEventListener('visibilitychange', checkpoint);
+    };
+  }, []);
+
+  const setDayIdx = (idx) => {
+    selectDay(idx);
+    const data = latest.current;
+    data.timerDay = F.SCHEDULE[idx].dateStr;
+    F.saveStore(data);
+    setStore({ ...data });
   };
+  React.useEffect(() => {
+    if (initialDayIdx != null) setDayIdx(initialDayIdx);
+  }, [initialDayIdx]);
+
+  const session = T.advance(store.timerSessions?.[day.dateStr], day, Date.now());
+  const { phaseIdx, running, history } = session;
+  const remaining = Math.ceil(session.remainingMs / 1000);
+  const log = session.completed
+    ? '세션 완료! 공부 기록이 저장되었습니다.'
+    : !day.phases.length ? '이 날은 자유 진행 항목입니다.'
+    : running ? '진행 중 · 앱을 다시 열어도 복원됩니다.'
+    : '시작·일시정지 상태와 공부 기록이 자동 저장됩니다.';
+  const act = (type) => {
+    const data = latest.current;
+    const next = T.action(data.timerSessions?.[day.dateStr], day, Date.now(), type);
+    putSession(data, day, next);
+    data.timerDay = day.dateStr;
+    F.saveStore(data);
+    setStore({ ...data });
+  };
+  const toggle = () => act('toggle');
+  const skipPhase = () => act('skip');
+  const reset = () => act('reset');
 
   const phase = day.phases[phaseIdx];
   const totalSec = phase ? phase.minutes * 60 : 0;
@@ -182,10 +175,10 @@ function Timer({ store, setStore, initialDayIdx }) {
         {/* Controls */}
         {day.phases.length > 0 && (
           <div className="timer-controls">
-            <button className="tbtn" onClick={skipPhase} title="다음 단계로">
+            <button className="tbtn" onClick={skipPhase} disabled={session.completed} title="다음 단계로">
               <Icons.skip size={20} />
             </button>
-            <button className="tbtn main" onClick={toggle} style={{ '--phase-current': phaseColor }}>
+            <button className="tbtn main" onClick={toggle} disabled={session.completed} style={{ '--phase-current': phaseColor }}>
               {running ? <Icons.pause size={34} color="#fff" /> : <Icons.play size={30} color="#fff" />}
             </button>
             <button className="tbtn" onClick={reset} title="리셋">

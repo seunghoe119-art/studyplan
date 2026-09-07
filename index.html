@@ -51,6 +51,7 @@
 
 <!-- Schedule engine (plain JS) -->
 <script src="app/schedule.js"></script>
+<script src="app/timer-state.js"></script>
 
 <!-- UI components -->
 <script type="text/babel" src="app/icons.jsx"></script>
@@ -104,7 +105,7 @@ function App() {
   return (
     <>
       {tab === 'home'     && <Dashboard    store={store} setStore={setStore} onNav={setTab} onStartToday={onStartToday} />}
-      {tab === 'timer'    && <Timer        store={store} setStore={setStore} initialDayIdx={timerDayIdx} />}
+      <div hidden={tab !== 'timer'}><Timer store={store} setStore={setStore} initialDayIdx={timerDayIdx} /></div>
       {tab === 'progress' && <ProgressView store={store} />}
 
       <TabBar tab={tab} onChange={setTab} />

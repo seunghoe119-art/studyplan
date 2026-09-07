@@ -247,7 +247,13 @@
   }
 
   function saveStore(STORE) {
-    try { localStorage.setItem(LS_KEY, JSON.stringify(STORE)); } catch (e) { /* ignore */ }
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(STORE));
+      return true;
+    } catch (e) {
+      alert('기록을 저장하지 못했습니다. 앱을 종료하기 전에 설정에서 데이터를 내보내 주세요.');
+      return false;
+    }
   }
 
   function getLog(STORE, dateStr) {
