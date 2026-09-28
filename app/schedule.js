@@ -228,6 +228,8 @@
       theme: 'system',
       accent: 'fire',
       dailyLog: {},
+      reflections: {},
+      reflectionTemplate: [],
       numbers: [
         { id: 'seed1', value: '130', unit: 'L/min',   subject: 'fire',   meaning: '옥내소화전 방수량', confuse: '옥외 350', category: '소방시설', fav: true,  createdAt: 0 },
         { id: 'seed2', value: '0.17', unit: 'MPa',    subject: 'fire',   meaning: '옥내소화전 방수압', confuse: '옥외 0.25', category: '소방시설', fav: false, createdAt: 0 },

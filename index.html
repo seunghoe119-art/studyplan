@@ -52,6 +52,7 @@
 <!-- Schedule engine (plain JS) -->
 <script src="app/schedule.js"></script>
 <script src="app/timer-state.js"></script>
+<script src="app/reflection-state.js"></script>
 
 <!-- UI components -->
 <script type="text/babel" src="app/icons.jsx"></script>
@@ -59,6 +60,7 @@
 <script type="text/babel" src="app/Timer.jsx"></script>
 <script type="text/babel" src="app/Progress.jsx"></script>
 <script type="text/babel" src="app/Settings.jsx"></script>
+<script type="text/babel" src="app/Reflection.jsx"></script>
 
 <script type="text/babel" data-presets="react">
 const { useState, useEffect } = React;
@@ -107,6 +109,7 @@ function App() {
       {tab === 'home'     && <Dashboard    store={store} setStore={setStore} onNav={setTab} onStartToday={onStartToday} />}
       <div hidden={tab !== 'timer'}><Timer store={store} setStore={setStore} initialDayIdx={timerDayIdx} /></div>
       {tab === 'progress' && <ProgressView store={store} />}
+      {tab === 'reflection' && <Reflection store={store} setStore={setStore} />}
 
       <TabBar tab={tab} onChange={setTab} />
 
@@ -125,6 +128,7 @@ function TabBar({ tab, onChange }) {
     { key: 'home',     label: '홈',     icon: Icons.home },
     { key: 'timer',    label: '타이머', icon: Icons.timer },
     { key: 'progress', label: '진행률', icon: Icons.chart },
+    { key: 'reflection', label: '하루 복기', icon: Icons.reflection },
   ];
   return ReactDOM.createPortal(
     <div className="tabbar-inner">

@@ -1,6 +1,11 @@
 // icons.jsx — SVG 아이콘 세트
 
 const Icons = {
+  reflection: (p) => (
+    <svg width={p?.size || 20} height={p?.size || 20} viewBox="0 0 24 24" fill="none">
+      <path d="M5 3h11l3 3v15H5V3zM9 8h6M9 12h6M9 16h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
   home: (p) => (
     <svg width={p?.size || 20} height={p?.size || 20} viewBox="0 0 24 24" fill="none">
       <path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1v-9z"
