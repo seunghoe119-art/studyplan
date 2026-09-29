@@ -4,13 +4,20 @@
   const shiftDate = (key, delta) => { const d = new Date(`${key}T12:00:00`); d.setDate(d.getDate()+delta); return dateKey(d); };
   const minutes = value => Math.max(0, Math.min(1440, Math.floor(Number(value) || 0)));
   const blank = () => ({ slots: [], study: '', rest: '', events: [], focusId: '', situation: '', reason: '', turning: '', alternative: '', win: '', cue: '', action: '', confirmed: false, check: '', helped: '', obstacle: '' });
+  function slotRange(s) {
+    const parse = s => /^([01]\d|2[0-3]):[0-5]\d$/.test(s || '') ? Number(s.slice(0,2))*60+Number(s.slice(3)) : NaN;
+    let a = parse(s.start), b = s.end === '24:00' ? 1440 : parse(s.end);
+    if (!Number.isFinite(a) || !Number.isFinite(b) || b === a) return null;
+    if (b < a) b += 1440;
+    if (s.startNextDay) { a += 1440; b += 1440; }
+    return { start: a, end: b, endNextDay: b >= 1440 };
+  }
   function availability(slots) {
     const ranges = []; let invalid = false;
-    const parse = s => /^([01]\d|2[0-3]):[0-5]\d$/.test(s || '') ? Number(s.slice(0,2))*60+Number(s.slice(3)) : NaN;
     for (const s of slots) {
-      const a = parse(s.start), b = s.end === '24:00' ? 1440 : parse(s.end);
-      if (!Number.isFinite(a) || !Number.isFinite(b) || b <= a) { invalid = true; continue; }
-      ranges.push([a,b]);
+      const range = slotRange(s);
+      if (!range) { invalid = true; continue; }
+      ranges.push([range.start,range.end]);
     }
     ranges.sort((a,b)=>a[0]-b[0]);
     let total = 0, end = -1, overlap = false;
@@ -50,7 +57,7 @@
     result.average=result.days ? Math.round(result.lost/result.days):null;
     return result;
   }
-  const api = { dateKey, shiftDate, minutes, blank, summarize, availability, totals, duration: n => `${Math.floor(n/60)}시간 ${n%60}분` };
+  const api = { dateKey, shiftDate, minutes, blank, summarize, slotRange, availability, totals, duration: n => `${Math.floor(n/60)}시간 ${n%60}분` };
   if (typeof module !== 'undefined') module.exports = api;
   root.ReflectionState = api;
 })(typeof window !== 'undefined' ? window : globalThis);

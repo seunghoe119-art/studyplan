@@ -4,10 +4,22 @@ const R = require('../app/reflection-state.js');
 test('availability merges overlapping slots without double counting',()=>{
  assert.deepEqual(R.availability([{start:'09:00',end:'12:00'},{start:'11:00',end:'14:00'},{start:'20:00',end:'22:00'}]),{total:420,invalid:false,overlap:true});
 });
-test('invalid and overnight slots require correction; midnight is supported',()=>{
- assert.equal(R.availability([{start:'22:00',end:'01:00'}]).invalid,true);
+test('overnight slots stay together; midnight and invalid input are handled',()=>{
+ assert.deepEqual(R.availability([{start:'22:00',end:'01:00'}]),{total:180,invalid:false,overlap:false});
  assert.equal(R.availability([{start:'22:00',end:'24:00'}]).total,120);
+ assert.equal(R.availability([{start:'22:00',end:'00:00'}]).total,120);
+ assert.equal(R.availability([{start:'07:00',end:'07:00'}]).invalid,true);
  assert.equal(R.availability([{start:'',end:''}]).invalid,true);
+});
+test('screenshot morning and evening intervals total seven hours one minute',()=>{
+ const slots=[{start:'07:02',end:'08:03'},{start:'19:03',end:'01:03'}];
+ assert.deepEqual(R.availability(slots),{total:421,invalid:false,overlap:false});
+ const day={...R.blank(),slots,study:400,rest:21};
+ assert.equal(R.summarize({'2026-09-29':day},'2026-09-29',7).total,421);
+});
+test('next-day overlap is merged without confusing same-date morning',()=>{
+ assert.deepEqual(R.availability([{start:'22:00',end:'02:00'},{start:'01:00',end:'03:00',startNextDay:true}]),{total:300,invalid:false,overlap:true});
+ assert.deepEqual(R.availability([{start:'01:00',end:'03:00'},{start:'22:00',end:'02:00'}]),{total:360,invalid:false,overlap:false});
 });
 test('unclassified time is independent of timer and over-allocation is visible',()=>{
  const d={...R.blank(),slots:[{start:'09:00',end:'12:00'}],study:100,rest:20,events:[{minutes:30}]};
